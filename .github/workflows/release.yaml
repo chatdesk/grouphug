@@ -1,25 +1,20 @@
-name: test
+name: release
 
 on:
-  pull_request:
+  push:
     branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
-
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
 
     - name: Install dependencies
       run: |
@@ -27,10 +22,13 @@ jobs:
         poetry install
 
     - name: Run tests
-      run: poetry run pytest tests
+      run: pytest -v -s tests
 
     - name: Build package
       run: poetry build
 
-    - name: Build docs
-      run: cd docs && make html
+    - name: Release to PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: twine upload --verbose dist/*
