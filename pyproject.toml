@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "grouphug"
-version = "0.7.0"
+version = "0.7.1"
 description = "GroupHug is a library with extensions to 🤗 transformers for multitask language modelling."
 authors = ["Sander Land"]
 license = "Apache2"
