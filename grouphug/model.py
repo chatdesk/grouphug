@@ -20,6 +20,8 @@ from transformers import (
     DebertaV2PreTrainedModel,
     DistilBertPreTrainedModel,
     ElectraPreTrainedModel,
+    GPTNeoXConfig,
+    GPTNeoXPreTrainedModel,
     OPTPreTrainedModel,
     PreTrainedTokenizerBase,
     RobertaPreTrainedModel,
@@ -430,9 +432,18 @@ class OPTMultiTaskModel(_BaseMultiTaskModel, OPTPreTrainedModel):
     pass
 
 
-class AutoMultiTaskModel:
+class GPTNeoXMultiTaskModel(_BaseMultiTaskModel, GPTNeoXPreTrainedModel):
+    pass
 
-    # TODO: from config
+
+class AutoMultiTaskModel:
+    @staticmethod
+    def _model_class_for_config(config):
+        automodel_cls = [k for k in _BaseMultiTaskModel.AUTOMODEL_CLASSES if k[0] == config.__class__]
+        if not automodel_cls:
+            return None
+        assert len(automodel_cls) == 1, "Multiple registered auto-classes found, call one of them directly"
+        return automodel_cls
 
     @classmethod
     def from_pretrained(
@@ -443,10 +454,10 @@ class AutoMultiTaskModel:
         tokenizer: Optional[PreTrainedTokenizerBase] = None,
         **kwargs,
     ) -> _BaseMultiTaskModel:
-        """
+        """Initialized a model from a pre-trained multi-task or base model
 
         Args:
-            head_configs: model head configurations. Will try to load if ommitted.
+            head_configs: model head configurations. Will try to load if omitted.
             formatter: optional DatasetFormatter which will be saved with the model, and can be used to infer on non-formatted data. Will try to load if omitted.
             tokenizer: pass a tokenizer here to avoid it being created by the model when it is missing one.
             kwargs: passed to model init, always empty in current setup, but can be used for your own models
@@ -454,10 +465,24 @@ class AutoMultiTaskModel:
         autoconfig = AutoConfig.from_pretrained(pretrained_model_name_or_path)
         kwargs = dict(head_configs=head_configs, formatter=formatter, tokenizer=tokenizer, **kwargs)
 
-        automodel_cls = [k for k in _BaseMultiTaskModel.AUTOMODEL_CLASSES if k[0] == autoconfig.__class__]
+        automodel_cls = cls._model_class_for_config(autoconfig)
         if not automodel_cls:
             raise NotImplementedError(
                 f"{pretrained_model_name_or_path} uses {autoconfig.__class__.__name__} which is not supported, see documentation for which models are supported by AutoMultiTaskModel"
             )
-        assert len(automodel_cls) == 1, "Multiple registered auto-classes found, call one of them directly"
         return automodel_cls[0][1].from_pretrained(pretrained_model_name_or_path, **kwargs)
+
+    @classmethod
+    def from_config(
+        cls,
+        config,
+        head_configs: List[HeadConfig],
+        formatter: DatasetFormatter = None,
+        tokenizer: Optional[PreTrainedTokenizerBase] = None,
+        **kwargs,
+    ) -> _BaseMultiTaskModel:
+        """See from_pretrained, but taking a config object instead"""
+        automodel_cls = cls._model_class_for_config(config)
+        return automodel_cls[0][1]._from_config(
+            config, head_configs=head_configs, formatter=formatter, tokenizer=tokenizer, **kwargs
+        )
