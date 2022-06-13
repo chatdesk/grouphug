@@ -3,6 +3,12 @@
 If you want to add a complex feature or change which is not already mentioned, please open an issue or discussion topic to discuss. 
 For simple additions and bug fixes you can open a PR directly.
 
+## Formatting and pre-commit hooks
+
+To ensure your PR is properly formatted, install pre-commit hooks using `pre-commit install`
+
+This will run black, isort, and clear any output from example notebooks when committing.
+
 # Notes on Grouphug internals
 
 This section contains notes on implementation details of huggingface transformers and grouphug.
