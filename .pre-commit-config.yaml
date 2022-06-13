@@ -1,10 +1,18 @@
 repos:
--   repo: https://github.com/psf/black
-    rev: 21.7b0
+  -   repo: https://github.com/psf/black
+      rev: 22.3.0
+      hooks:
+        - id: black
+  -   repo: https://github.com/timothycrosley/isort
+      rev: 5.10.1
+      hooks:
+        - id: isort
+          name: isort (python)
+  - repo: local
     hooks:
-      - id: black
--   repo: https://github.com/timothycrosley/isort
-    rev: 5.9.3
-    hooks:
-      - id: isort
-        name: isort (python)
+      - id: jupyter-nb-clear-output
+        name: jupyter-nb-clear-output
+        files: examples/.*\.ipynb
+        stages: [commit]
+        language: system
+        entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace

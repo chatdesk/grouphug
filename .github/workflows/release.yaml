@@ -1,0 +1,34 @@
+name: release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        pip install poetry twine
+        poetry install
+
+    - name: Run tests
+      run: pytest -v -s tests
+
+    - name: Build package
+      run: poetry build
+
+    - name: Release to PyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USER }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: twine upload --verbose dist/*
