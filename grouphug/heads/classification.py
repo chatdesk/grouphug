@@ -112,7 +112,7 @@ class ClassificationHead(ModelHead):
                 labels: torch.Tensor = labels.float()  # BCEWithLogitsLoss does not like ints
                 ignore_labels_mask: torch.Tensor = labels == self.head_config.ignore_index  # save this before smoothing
                 if label_smoothing:
-                    labels = labels * (1 - label_smoothing) + torch.ones_like(labels) * label_smoothing
+                    labels = labels * (1 - label_smoothing) + torch.ones_like(labels) * 0.5 * label_smoothing
                 if ignore_labels_mask.any():  # ignore entries by setting loss to 0
                     loss_fct = BCEWithLogitsLoss(pos_weight=self.pos_weight, reduction="none")
                     loss_entries = loss_fct(logits, labels)
