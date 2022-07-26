@@ -80,7 +80,7 @@ The package has support for the following base models:
 * Bert, DistilBert, Roberta/DistilRoberta, XLM-Roberta 
 * Deberta/DebertaV2
 * Electra
-* OPT
+* GPT2, GPT-J, GPT-NeoX, OPT
 
 Extending it to support other models is possible by simply inheriting from `_BaseMultiTaskModel`, although language modelling head weights may not always load. 
 

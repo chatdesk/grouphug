@@ -20,7 +20,8 @@ from transformers import (
     DebertaV2PreTrainedModel,
     DistilBertPreTrainedModel,
     ElectraPreTrainedModel,
-    GPTNeoXConfig,
+    GPT2PreTrainedModel,
+    GPTJPreTrainedModel,
     GPTNeoXPreTrainedModel,
     OPTPreTrainedModel,
     PreTrainedTokenizerBase,
@@ -74,17 +75,17 @@ class ModelInferenceError(Exception):
         self.batch = batch
 
 
-DEFAULT_IGNORE_MISSING = ["lm_head.lm_head"]
+DEFAULT_IGNORE_MISSING = ["lm_head.lm_head", "lm_head.decoder.weight"]
+DEFAULT_IGNORE_SAVE = ["lm_head.decoder.weight"]
 
 
 class _BaseMultiTaskModel(ABC):
-    _keys_to_ignore_on_load_missing = DEFAULT_IGNORE_MISSING
-    # TODO: default ignore save
-
     AUTOMODEL_CLASSES = []
 
     def __init_subclass__(cls, register_auto_class=True, **kwargs):
         super().__init_subclass__(**kwargs)
+        cls._keys_to_ignore_on_load_missing += DEFAULT_IGNORE_MISSING
+        cls._keys_to_ignore_on_save += DEFAULT_IGNORE_SAVE
         if register_auto_class and hasattr(cls, "config_class"):
             _BaseMultiTaskModel.AUTOMODEL_CLASSES.append((cls.config_class, cls))
 
@@ -416,7 +417,7 @@ class XLMRobertaMultiTaskModel(_BertModelBase, RobertaPreTrainedModel):
 
 
 class ElectraMultiTaskModel(_BaseMultiTaskModel, ElectraPreTrainedModel):
-    _keys_to_ignore_on_load_missing = ElectraPreTrainedModel._keys_to_ignore_on_load_missing + DEFAULT_IGNORE_MISSING
+    pass
 
 
 class DebertaMultiTaskModel(_BaseMultiTaskModel, DebertaPreTrainedModel):
@@ -429,6 +430,14 @@ class DebertaV2MultiTaskModel(_BaseMultiTaskModel, DebertaV2PreTrainedModel):
 
 
 class OPTMultiTaskModel(_BaseMultiTaskModel, OPTPreTrainedModel):
+    pass
+
+
+class GPT2MultiTaskModel(_BaseMultiTaskModel, GPT2PreTrainedModel):
+    pass
+
+
+class GPTJMultiTaskModel(_BaseMultiTaskModel, GPTJPreTrainedModel):
     pass
 
 
