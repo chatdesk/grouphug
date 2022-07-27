@@ -84,9 +84,9 @@ class _BaseMultiTaskModel(ABC):
 
     def __init_subclass__(cls, register_auto_class=True, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls._keys_to_ignore_on_load_missing += DEFAULT_IGNORE_MISSING
-        cls._keys_to_ignore_on_save += DEFAULT_IGNORE_SAVE
-        if register_auto_class and hasattr(cls, "config_class"):
+        if register_auto_class and hasattr(cls, "config_class"):  # if not some intermediate helper mixin
+            cls._keys_to_ignore_on_load_missing = (cls._keys_to_ignore_on_load_missing or []) + DEFAULT_IGNORE_MISSING
+            cls._keys_to_ignore_on_save = (cls._keys_to_ignore_on_save or []) + DEFAULT_IGNORE_SAVE
             _BaseMultiTaskModel.AUTOMODEL_CLASSES.append((cls.config_class, cls))
 
     def __init__(
