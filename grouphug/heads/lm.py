@@ -99,7 +99,7 @@ class BaseLMHead(ModelHead):
         loss_fct = CrossEntropyLoss()
         masked_lm_loss = loss_fct(prediction_scores.view(-1, self.config.vocab_size), labels.view(-1))
         if torch.isnan(masked_lm_loss) and (labels == -100).all():
-            masked_lm_loss = torch.tensor(0.0, requires_grad=True)  # * prediction_scores.sum()
+            masked_lm_loss = prediction_scores.new_zeros([], requires_grad=True)  # 0.0 with matching type and device
         return masked_lm_loss
 
     def head_output_embeddings(self):
