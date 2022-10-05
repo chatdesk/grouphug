@@ -22,7 +22,7 @@ jobs:
         poetry install
 
     - name: Run tests
-      run: pytest -v -s tests
+      run: poetry run pytest -v -s tests
 
     - name: Build package
       run: poetry build
