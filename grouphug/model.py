@@ -391,6 +391,16 @@ class _BaseMultiTaskModel(ABC):
             pretrained_model_name_or_path, head_configs=head_configs, formatter=formatter, *args, **kwargs
         )
 
+    def get_word_embeddings(self) -> torch.nn.Embedding:
+        return self.base_model.embeddings.word_embeddings
+
+    def token_similarity(self, indices: torch.Tensor):
+        """given a tensor of token indices of size n, returns a tensor of size n x vocab_size of token similarity"""
+        embeddings = torch.nn.functional.normalize(self.get_word_embeddings().weight.detach())
+        similarity = embeddings[indices] @ embeddings.t()  # range (-1..1)
+        similarity[:, self.tokenizer().all_special_ids] = -1.0  # minimum value
+        return similarity
+
 
 # common to bert/roberta models in huggingface is removing the pooling layer
 class _BertModelBase(_BaseMultiTaskModel, register_auto_class=False):

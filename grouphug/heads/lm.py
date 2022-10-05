@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Set
+from typing import Callable, Dict, Optional, Set
 
 import torch
 from torch import nn
@@ -30,6 +30,8 @@ from grouphug.config import (
     MASKED_PREFIX,
     MLM_LABELS_VAR,
     MTD_LABELS_VAR,
+    MTD_TOKEN_RANDOM,
+    MTD_TOKEN_SIMILARITY,
     logger,
 )
 from grouphug.heads.base import HeadConfig, ModelHead
@@ -339,6 +341,7 @@ class LMHeadConfig(HeadConfig):
         generated_token_probability: Of the tokens chosen with mlm_probability, but not masked, which ones should be replaced. Default 50% without masked_token_detection (corresponding to the default 80/10/10 split in BERT), 100% otherwise.
         predict_all_tokens: Calculate loss over non-masked tokens as well in MLM
         mtd_pos_weight: weight for the positive entries in BCEWithLogitsLoss for masked token detection.
+        mtd_strategy: strategy for token masking, or a callable. see collator for details.
         attribute: by default automatically determined from model type to ensure pre-trained weights load.
     """
 
@@ -365,6 +368,7 @@ class LMHeadConfig(HeadConfig):
         generated_token_probability: Optional[float] = None,
         predict_all_tokens: bool = False,
         mtd_pos_weight: float = None,
+        mtd_strategy: Optional[Callable] = None,
         **kwargs,
     ):
         # Allow MLM, MTD, CLM and MLM+MTD
@@ -395,6 +399,13 @@ class LMHeadConfig(HeadConfig):
         if generated_token_probability is None:
             generated_token_probability = 1.0 if self.masked_token_detection else 0.5
         self.generated_token_probability = generated_token_probability
+
+        if mtd_strategy is not None:
+            self.mtd_strategy = mtd_strategy
+        elif self.masked_token_detection:  # MTD default
+            self.mtd_strategy = MTD_TOKEN_SIMILARITY
+        else:  # MLM default
+            self.mtd_strategy = MTD_TOKEN_RANDOM
 
         kwargs["input_prefix"] = MASKED_PREFIX if separate_embedding else ""
         super().__init__(**kwargs)

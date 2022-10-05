@@ -1408,6 +1408,17 @@ tomli = ">=1.0.0"
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
 
 [[package]]
+name = "pytest-pycharm"
+version = "0.7.0"
+description = "Plugin for py.test to enter PyCharm debugger on uncaught exceptions"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+pytest = ">=2.3"
+
+[[package]]
 name = "pytest-subtests"
 version = "0.7.0"
 description = "unittest subTest() support and subtests fixture"
@@ -2070,7 +2081,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8,<4.0"
-content-hash = "4efcfc8742d36e583361b61ca1292e1f929a03fa20ce02a9361bacec7d1b4922"
+content-hash = "6731d30d0ee06a14ab36695cf6313812bb30d8ebd1b0ae5a24f3a2fc140764ce"
 
 [metadata.files]
 aiohttp = [
@@ -3214,6 +3225,10 @@ pyrsistent = [
 pytest = [
     {file = "pytest-7.1.3-py3-none-any.whl", hash = "sha256:1377bda3466d70b55e3f5cecfa55bb7cfcf219c7964629b967c37cf0bda818b7"},
     {file = "pytest-7.1.3.tar.gz", hash = "sha256:4f365fec2dff9c1162f834d9f18af1ba13062db0c708bf7b946f8a5c76180c39"},
+]
+pytest-pycharm = [
+    {file = "pytest-pycharm-0.7.0.tar.gz", hash = "sha256:d920c016a2b14449b68943762d0fa42dc03cb0060b5c375336e5e2b1bebda0dd"},
+    {file = "pytest_pycharm-0.7.0-py3-none-any.whl", hash = "sha256:5a642e3e21487cb2e1bf78464edb7f1b31996f8fce34780786f218144de9d7cf"},
 ]
 pytest-subtests = [
     {file = "pytest-subtests-0.7.0.tar.gz", hash = "sha256:95c44c77e3fbede9848bb88ca90b384815fcba8090ef9a9f55659ab163b1681c"},

@@ -12,6 +12,9 @@ MLM_LABELS_VAR = "mlm_labels"
 MTD_LABELS_VAR = "mtd_labels"
 CLM_LABELS_VAR = "clm_labels"
 
+MTD_TOKEN_SIMILARITY = "token_similarity"
+MTD_TOKEN_RANDOM = "random"
+
 # essentially what _pad cares about
 TOKENIZER_VARS = [INPUT_IDS_VAR, "attention_mask", "token_type_ids", "special_tokens_mask"]
 

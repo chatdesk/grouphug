@@ -7,6 +7,12 @@ license = "Apache2"
 readme = "README.md"
 homepage = "https://github.com/chatdesk/grouphug"
 keywords = ["transformers","language modelling","machine learning","classification"]
+[tool.poetry.group.dev.dependencies]
+pytest-pycharm = "^0.7.0"
+black = "^22.8.0"
+isort = "^5.10.1"
+pytest = "^7.1.3"
+
 
 [tool.isort]
 profile = "black"

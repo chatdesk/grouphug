@@ -10,6 +10,8 @@ from grouphug.config import (
     MASKED_INPUT_IDS_VAR,
     MLM_LABELS_VAR,
     MTD_LABELS_VAR,
+    MTD_TOKEN_RANDOM,
+    MTD_TOKEN_SIMILARITY,
     logger,
 )
 from grouphug.model import _BaseMultiTaskModel
@@ -61,12 +63,26 @@ class AutoCollator:
         else:
             return default_data_collator(columns, return_tensors=return_tensors)
 
-    def generate_replacement_tokens(self, token_ids: torch.Tensor, replace_indices: torch.Tensor):
+    def generate_replacement_tokens(self, token_ids: torch.Tensor, replace_indices: torch.Tensor, strategy: str):
         """Generates replacement tokens for MLM/MTD.
         Default just takes random token ids, as used in BERT.
         This appears to be 'too easy' for MTD, so consider overwriting this with a generator based version."""
         tokens_to_replace = token_ids[replace_indices]
-        return torch.randint(len(self.tokenizer), tokens_to_replace.shape, dtype=torch.long)
+        if strategy == MTD_TOKEN_RANDOM:
+            return torch.randint(len(self.tokenizer), tokens_to_replace.shape, dtype=torch.long)
+        elif strategy == MTD_TOKEN_SIMILARITY:  # cosine distance ish
+            unique_ids_to_replace, ixs = torch.unique(tokens_to_replace, return_inverse=True)
+            similarity = self.model.token_similarity(unique_ids_to_replace)
+            similarity -= torch.mean(similarity, dim=1, keepdim=True)
+            similarity /= torch.std(similarity, dim=1, keepdim=True)
+            # sample ps
+            similarity[similarity < 3] = 0  # only take top 0.2% of tokens
+            for i in range(similarity.size(0)):  # TODO: scatter_ ?
+                similarity[i, unique_ids_to_replace[i]] = 1e-6  # ensures sum is never 0
+            replacement_tokens = torch.multinomial(similarity[ixs, :], 1)[:, 0]
+            return replacement_tokens
+        else:
+            raise ValueError("Invalid strategy")
 
     def torch_mask_tokens(self, original_inputs: torch.Tensor, special_tokens_mask: torch.Tensor):
         """
@@ -98,7 +114,9 @@ class AutoCollator:
             ).bool()
         if indices_replaced is not None:
             indices_random &= ~indices_replaced
-        masked_inputs[indices_random] = self.generate_replacement_tokens(masked_inputs, indices_random)
+        masked_inputs[indices_random] = self.generate_replacement_tokens(
+            masked_inputs, indices_random, self.mlm_head.mtd_strategy
+        )
 
         # The rest of the time (MLM: 10%, MTD: 0%) we keep the masked input tokens unchanged
         return masked_inputs, labels, masked_indices
