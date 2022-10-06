@@ -72,7 +72,7 @@ class AutoCollator:
             return torch.randint(len(self.tokenizer), tokens_to_replace.shape, dtype=torch.long)
         elif strategy == MTD_TOKEN_SIMILARITY:  # cosine distance ish
             unique_ids_to_replace, ixs = torch.unique(tokens_to_replace, return_inverse=True)
-            similarity = self.model.token_similarity(unique_ids_to_replace)
+            similarity = self.model.token_similarity(unique_ids_to_replace).to(token_ids.device)  # to cpu
             similarity -= torch.mean(similarity, dim=1, keepdim=True)
             similarity /= torch.std(similarity, dim=1, keepdim=True)
             # sample ps
