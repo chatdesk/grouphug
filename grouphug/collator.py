@@ -19,7 +19,7 @@ from grouphug.model import _BaseMultiTaskModel
 
 class AutoCollator:
     def __init__(self, model: _BaseMultiTaskModel, tokenizer):
-        """..."""
+        """Collates inputs and handles masking when needed"""
         self.model = model
         self.mlm_head = model.get_mlm_head()
         self.mlm_active = self.mlm_head is not None

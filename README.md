@@ -88,7 +88,6 @@ Extending it to support other models is possible by simply inheriting from `_Bas
 
 * The package only supports PyTorch, and will not work with other frameworks. There are no plans to change this.
 * Grouphug was developed and tested with 🤗 transformers 4.19-4.22. We will aim to test and keep compatibility with the latest version, but it is still recommended to lock the latest working versions. 
-* It has only been tested on training and inference on a single GPU, and some wrappers in the training code may not be completely happy when moving to multi-GPU or TPU environments. Testing on such environments and patches for any bugs found are appreciated.
 
 See the [contributing page](CONTRIBUTING.md) if you are interested in contributing.
 
