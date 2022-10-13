@@ -1,12 +1,12 @@
 # This is a generic compute_metrics function that will give a range of metrics for classification tasks
 
+import evaluate
 import numpy as np
-from datasets import load_metric
 
 from grouphug import ClassificationHead
 from grouphug.config import IGNORE_INDEX
 
-metrics = {k: load_metric(k) for k in ["accuracy", "f1", "recall", "precision", "matthews_correlation"]}
+metrics = {k: evaluate.load(k) for k in ["accuracy", "f1", "recall", "precision", "matthews_correlation"]}
 
 
 def compute_classification_metrics(eval_preds, dataset_name, heads):
