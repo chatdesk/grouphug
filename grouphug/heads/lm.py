@@ -416,7 +416,7 @@ class LMHeadConfig(HeadConfig):
                 self.attribute = self.attribute or attr
                 return head_cls(config, self)
 
-        logger.warning(f"No MLM head registered for {config.__class__.__name__}, using default")
+        logger.warning(f"No language modelling head registered for {config.__class__.__name__}, using default")
         self.attribute = self.attribute or "lm_head"
         return BaseLMHead(config, self)
 
