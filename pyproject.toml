@@ -7,7 +7,9 @@ license = "Apache2"
 readme = "README.md"
 homepage = "https://github.com/chatdesk/grouphug"
 keywords = ["transformers","language modelling","machine learning","classification"]
-
+packages = [
+    {include = "grouphug"}
+]
 
 [tool.isort]
 profile = "black"
