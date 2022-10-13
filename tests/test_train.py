@@ -251,7 +251,7 @@ def test_train_mlm_mtd(dataset_regress, training_args):
     training_args.evaluation_strategy = None
 
     for sep in [True, False]:
-        for mlm, mtd in [(True, False), (False, True), (True, True)]:
+        for mlm, mtd, mtd_strategy in [(True, False, None), (False, True, "random"), (True, True, "token_similarity")]:
             head_configs = [
                 LMHeadConfig(
                     masked_language_modelling=mlm,
@@ -317,30 +317,3 @@ def test_train_forgot_encode(dataset_multiclass_topics_star, training_args):
     )
     with pytest.raises(ModelInferenceError):
         trainer.train()
-
-
-def test_train_mtd_harder(dataset_regress, training_args):
-    base_model = SMALL_MODEL
-    tokenizer = AutoTokenizer.from_pretrained(base_model)
-    fmt = DatasetFormatter().tokenize()
-    data = fmt.apply(dataset_regress, tokenizer=tokenizer, test_size=0)
-    training_args.evaluation_strategy = None
-
-    head_configs = [
-        LMHeadConfig(
-            masked_language_modelling=False,
-            masked_token_detection=True,
-            mtd_pos_weight=2.0,
-        ),
-        ClassificationHeadConfig.from_data(data, labels_var="y"),
-    ]
-    model = AutoMultiTaskModel.from_pretrained(base_model, head_configs, tokenizer=tokenizer, formatter=fmt)
-    trainer = MultiTaskTrainer(
-        model=model,
-        tokenizer=tokenizer,
-        args=training_args,
-        train_data=data[:, "train"],
-    )
-    trainer.train()
-    result = model.predict(dict(text="blabla"))
-    assert result.keys() == {"y_predicted_value"}

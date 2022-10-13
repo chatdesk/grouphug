@@ -341,7 +341,7 @@ class LMHeadConfig(HeadConfig):
         generated_token_probability: Of the tokens chosen with mlm_probability, but not masked, which ones should be replaced. Default 50% without masked_token_detection (corresponding to the default 80/10/10 split in BERT), 100% otherwise.
         predict_all_tokens: Calculate loss over non-masked tokens as well in MLM
         mtd_pos_weight: weight for the positive entries in BCEWithLogitsLoss for masked token detection.
-        mtd_strategy: strategy for token masking, or a callable. see collator for details.
+        mtd_strategy: strategy for token masking, or a callable. see collator for details. Defaults to "token_similarity" for masked_token_detection and "random" for masked_language_modelling.
         attribute: by default automatically determined from model type to ensure pre-trained weights load.
     """
 
