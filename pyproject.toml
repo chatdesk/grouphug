@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "chatdesk-grouphug"
+name = "grouphug"
 version = "0.8.0"
 description = "GroupHug is a library with extensions to 🤗 transformers for multitask language modelling."
 authors = ["Sander Land"]
@@ -7,9 +7,6 @@ license = "Apache2"
 readme = "README.md"
 homepage = "https://github.com/sanderland/grouphug"
 keywords = ["transformers","language modelling","machine learning","classification"]
-packages = [
-    {include = "grouphug"}
-]
 
 [tool.isort]
 profile = "black"
