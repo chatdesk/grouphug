@@ -1,6 +1,6 @@
 # scratch notebooks for development and testing
 dev*.ipynb
-
+dev*.py
 # huggingface caches, trained model examples and such
 output/
 models/
