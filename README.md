@@ -4,10 +4,6 @@
 GroupHug is a library with extensions to 🤗 transformers for multitask language modelling.
 In addition, it contains utilities that ease data preparation, training, and inference.
 
-## Project Moved
-
-Grouphug maintenance and future versions have moved to [my personal repository](https://github.com/sanderland/grouphug).
-
 ## Overview
 
 The package is optimized for training a single language model to make quick and robust predictions for a wide variety of related tasks at once,
@@ -97,7 +93,7 @@ See the [contributing page](CONTRIBUTING.md) if you are interested in contributi
 
 ## License
 
-grouphug was developed by [Chatdesk](http://www.chatdesk.com) and is licensed under the Apache 2 [license](LICENSE).
+grouphug was initially developed at [Chatdesk](http://www.chatdesk.com) and is licensed under the Apache 2 [license](LICENSE).
 
 
 
