@@ -4,6 +4,10 @@
 GroupHug is a library with extensions to 🤗 transformers for multitask language modelling.
 In addition, it contains utilities that ease data preparation, training, and inference.
 
+## Project Moved
+
+Grouphug maintenance and future versions have moved to [my personal repository](https://github.com/sanderland/grouphug).
+
 ## Overview
 
 The package is optimized for training a single language model to make quick and robust predictions for a wide variety of related tasks at once,
@@ -80,16 +84,14 @@ The package has support for the following base models:
 * Bert, DistilBert, Roberta/DistilRoberta, XLM-Roberta 
 * Deberta/DebertaV2
 * Electra
-* OPT
+* GPT2, GPT-J, GPT-NeoX, OPT
 
 Extending it to support other models is possible by simply inheriting from `_BaseMultiTaskModel`, although language modelling head weights may not always load. 
 
 ## Limitations
 
 * The package only supports PyTorch, and will not work with other frameworks. There are no plans to change this.
-* Grouphug was developed and tested with 🤗 transformers 4.19.x. We will aim to test and keep compatibility with the latest version, but it is still recommended to lock the latest working versions. 
-* It has only been tested on training and inference on a single GPU, and some wrappers in the training code may not be completely happy when moving to multi-GPU or TPU environments. Testing on such environments and patches for any bugs found are appreciated.
-* The default used for masked token detection is using random tokens rather than a generator, which appears to be an overly simple task.  We plan to look into an intermediate solution between random tokens and a full generator, and contributions are appreciated.
+* Grouphug was developed and tested with 🤗 transformers 4.19-4.22. We will aim to test and keep compatibility with the latest version, but it is still recommended to lock the latest working versions. 
 
 See the [contributing page](CONTRIBUTING.md) if you are interested in contributing.
 

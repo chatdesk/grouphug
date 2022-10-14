@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional, Set
 
 import torch
 from torch import nn
-from transformers.utils import ModelOutput
+from transformers.modeling_outputs import ModelOutput
 
 from grouphug.config import INPUT_IDS_VAR
 

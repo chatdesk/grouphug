@@ -251,7 +251,7 @@ def test_train_mlm_mtd(dataset_regress, training_args):
     training_args.evaluation_strategy = None
 
     for sep in [True, False]:
-        for mlm, mtd in [(True, False), (False, True), (True, True)]:
+        for mlm, mtd, mtd_strategy in [(True, False, None), (False, True, "random"), (True, True, "token_similarity")]:
             head_configs = [
                 LMHeadConfig(
                     masked_language_modelling=mlm,

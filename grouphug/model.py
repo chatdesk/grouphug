@@ -20,6 +20,9 @@ from transformers import (
     DebertaV2PreTrainedModel,
     DistilBertPreTrainedModel,
     ElectraPreTrainedModel,
+    GPT2PreTrainedModel,
+    GPTJPreTrainedModel,
+    GPTNeoXPreTrainedModel,
     OPTPreTrainedModel,
     PreTrainedTokenizerBase,
     RobertaPreTrainedModel,
@@ -72,18 +75,18 @@ class ModelInferenceError(Exception):
         self.batch = batch
 
 
-DEFAULT_IGNORE_MISSING = ["lm_head.lm_head"]
+DEFAULT_IGNORE_MISSING = ["lm_head.lm_head", "lm_head.decoder.weight"]
+DEFAULT_IGNORE_SAVE = ["lm_head.decoder.weight"]
 
 
 class _BaseMultiTaskModel(ABC):
-    _keys_to_ignore_on_load_missing = DEFAULT_IGNORE_MISSING
-    # TODO: default ignore save
-
     AUTOMODEL_CLASSES = []
 
     def __init_subclass__(cls, register_auto_class=True, **kwargs):
         super().__init_subclass__(**kwargs)
-        if register_auto_class and hasattr(cls, "config_class"):
+        if register_auto_class and hasattr(cls, "config_class"):  # if not some intermediate helper mixin
+            cls._keys_to_ignore_on_load_missing = (cls._keys_to_ignore_on_load_missing or []) + DEFAULT_IGNORE_MISSING
+            cls._keys_to_ignore_on_save = (cls._keys_to_ignore_on_save or []) + DEFAULT_IGNORE_SAVE
             _BaseMultiTaskModel.AUTOMODEL_CLASSES.append((cls.config_class, cls))
 
     def __init__(
@@ -388,6 +391,16 @@ class _BaseMultiTaskModel(ABC):
             pretrained_model_name_or_path, head_configs=head_configs, formatter=formatter, *args, **kwargs
         )
 
+    def get_word_embeddings(self) -> torch.nn.Embedding:
+        return self.base_model.embeddings.word_embeddings
+
+    def token_similarity(self, indices: torch.Tensor):
+        """given a tensor of token indices of size n, returns a tensor of size n x vocab_size of token similarity"""
+        embeddings = torch.nn.functional.normalize(self.get_word_embeddings().weight.detach())
+        similarity = embeddings[indices] @ embeddings.t()  # range (-1..1)
+        similarity[:, self.tokenizer().all_special_ids] = -1.0  # minimum value
+        return similarity
+
 
 # common to bert/roberta models in huggingface is removing the pooling layer
 class _BertModelBase(_BaseMultiTaskModel, register_auto_class=False):
@@ -414,7 +427,7 @@ class XLMRobertaMultiTaskModel(_BertModelBase, RobertaPreTrainedModel):
 
 
 class ElectraMultiTaskModel(_BaseMultiTaskModel, ElectraPreTrainedModel):
-    _keys_to_ignore_on_load_missing = ElectraPreTrainedModel._keys_to_ignore_on_load_missing + DEFAULT_IGNORE_MISSING
+    pass
 
 
 class DebertaMultiTaskModel(_BaseMultiTaskModel, DebertaPreTrainedModel):
@@ -430,9 +443,26 @@ class OPTMultiTaskModel(_BaseMultiTaskModel, OPTPreTrainedModel):
     pass
 
 
-class AutoMultiTaskModel:
+class GPT2MultiTaskModel(_BaseMultiTaskModel, GPT2PreTrainedModel):
+    pass
 
-    # TODO: from config
+
+class GPTJMultiTaskModel(_BaseMultiTaskModel, GPTJPreTrainedModel):
+    pass
+
+
+class GPTNeoXMultiTaskModel(_BaseMultiTaskModel, GPTNeoXPreTrainedModel):
+    pass
+
+
+class AutoMultiTaskModel:
+    @staticmethod
+    def _model_class_for_config(config):
+        automodel_cls = [k for k in _BaseMultiTaskModel.AUTOMODEL_CLASSES if k[0] == config.__class__]
+        if not automodel_cls:
+            return None
+        assert len(automodel_cls) == 1, "Multiple registered auto-classes found, call one of them directly"
+        return automodel_cls
 
     @classmethod
     def from_pretrained(
@@ -443,10 +473,10 @@ class AutoMultiTaskModel:
         tokenizer: Optional[PreTrainedTokenizerBase] = None,
         **kwargs,
     ) -> _BaseMultiTaskModel:
-        """
+        """Initialized a model from a pre-trained multi-task or base model
 
         Args:
-            head_configs: model head configurations. Will try to load if ommitted.
+            head_configs: model head configurations. Will try to load if omitted.
             formatter: optional DatasetFormatter which will be saved with the model, and can be used to infer on non-formatted data. Will try to load if omitted.
             tokenizer: pass a tokenizer here to avoid it being created by the model when it is missing one.
             kwargs: passed to model init, always empty in current setup, but can be used for your own models
@@ -454,10 +484,24 @@ class AutoMultiTaskModel:
         autoconfig = AutoConfig.from_pretrained(pretrained_model_name_or_path)
         kwargs = dict(head_configs=head_configs, formatter=formatter, tokenizer=tokenizer, **kwargs)
 
-        automodel_cls = [k for k in _BaseMultiTaskModel.AUTOMODEL_CLASSES if k[0] == autoconfig.__class__]
+        automodel_cls = cls._model_class_for_config(autoconfig)
         if not automodel_cls:
             raise NotImplementedError(
                 f"{pretrained_model_name_or_path} uses {autoconfig.__class__.__name__} which is not supported, see documentation for which models are supported by AutoMultiTaskModel"
             )
-        assert len(automodel_cls) == 1, "Multiple registered auto-classes found, call one of them directly"
         return automodel_cls[0][1].from_pretrained(pretrained_model_name_or_path, **kwargs)
+
+    @classmethod
+    def from_config(
+        cls,
+        config,
+        head_configs: List[HeadConfig],
+        formatter: DatasetFormatter = None,
+        tokenizer: Optional[PreTrainedTokenizerBase] = None,
+        **kwargs,
+    ) -> _BaseMultiTaskModel:
+        """See from_pretrained, but taking a config object instead"""
+        automodel_cls = cls._model_class_for_config(config)
+        return automodel_cls[0][1]._from_config(
+            config, head_configs=head_configs, formatter=formatter, tokenizer=tokenizer, **kwargs
+        )
