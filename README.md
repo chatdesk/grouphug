@@ -94,3 +94,4 @@ See the [contributing page](CONTRIBUTING.md) if you are interested in contributi
 ## License
 
 grouphug was initially developed at [Chatdesk](http://www.chatdesk.com) and is licensed under the Apache 2 [license](LICENSE).
+
