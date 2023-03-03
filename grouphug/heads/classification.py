@@ -236,7 +236,7 @@ class ClassificationHeadConfig(HeadConfig):
         num_labels=None,
         problem_type=None,
         extra_inputs_vars: List[str] = None,
-        num_extra_inputs: Optional[int] = None,
+        num_extra_inputs: Optional[int] = 0,
         pooling_method: str = "auto",
         classifier_hidden_size: Optional[int] = None,
         id2label: List[Any] = None,
