@@ -314,6 +314,8 @@ class ClassificationHeadConfig(HeadConfig):
             id2label=id2label,
             pooling_method=pooling_method,
             classifier_hidden_size=classifier_hidden_size,
+            num_extra_inputs=num_extra_inputs,
+            extra_inputs_vars=extra_inputs_vars,
             **kwargs,
         )
 
