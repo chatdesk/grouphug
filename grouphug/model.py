@@ -220,12 +220,14 @@ class _BaseMultiTaskModel(ABC):
         optional_args = {k: v for k, v in optional_args.items() if v is not None}
         return encoder(kwargs[prefix + INPUT_IDS_VAR], return_dict=True, **optional_args)  # not optional
 
-    def forward(self, inference_only: bool = False, **kwargs):
+    def forward(self, inference_only: bool = False, return_loss: bool = True, **kwargs):
         r"""Determines which heads can be run, and returns weighted loss over them along with individual head outputs
 
         Args:
             inference_only: will run heads even when labels are missing, and return full details
-            return_embeddings: will return a dict in .prefix_to_embedding"""
+            return_embeddings: will return a dict in .prefix_to_embedding
+            return_loss: default to True to make Trainer compute loss during evaluation stage
+        """
         # Which heads can we infer with these args?
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         # which head can we run given the inputs and mode?
